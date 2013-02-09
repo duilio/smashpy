@@ -44,6 +44,9 @@ move_fixtures = [
     ('4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1',
      Move(sq.e1, sq.c1),
      '4k3/8/8/8/8/8/8/2KR3R b - - 0 2'),
+    ('4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1',
+     Move(sq.e1, sq.g1),
+     '4k3/8/8/8/8/8/8/R4RK1 b - - 0 2'),
     ]
 
 check_fixtures = [
