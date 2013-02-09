@@ -1,7 +1,7 @@
 class Move(object):
     __slot__ = ['src', 'dst', 'en_passant', 'capture', 'promote']
 
-    def __init__(self, src, dst, capture='', en_passant=None, promote=' '):
+    def __init__(self, src, dst, capture=None, en_passant=None, promote=None):
         self.src = src
         self.dst = dst
         self.en_passant = en_passant
@@ -9,12 +9,19 @@ class Move(object):
         self.promote = promote
 
     def __eq__(self, other):
-        a = (self.src, self.dst, self.en_passant, self.capture, self.promote)
-        b = (other.src, other.dst, other.en_passant, other.capture, other.promote)
-        return a == b
+        return self._tuple() == other._tuple()
 
     def __str__(self):
-        return str((self.src, self.dst, self.en_passant, self.capture, self.promote))
+        return str(self._tuple())
 
     def __repr__(self):
         return 'Move' + str(self)
+
+    def __hash__(self):
+        return hash(self._tuple())
+
+    def __lt__(self, other):
+        return self._tuple() < other._tuple()
+
+    def _tuple(self):
+        return (self.src, self.dst, self.en_passant, self.capture, self.promote)
