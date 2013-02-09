@@ -1,7 +1,9 @@
 import unittest
 from smash.board import Board, SquareHelper
 from smash.move import Move
-from smash.movegen import gen_moves, gen_pawn_moves, gen_knight_moves
+from smash.movegen import \
+    gen_moves, gen_pawn_moves, gen_knight_moves, gen_bishop_moves, \
+    gen_rook_moves, gen_queen_moves, gen_king_moves
 
 
 class PawnMoveTest(unittest.TestCase):
@@ -91,6 +93,68 @@ class KnightMoveTest(unittest.TestCase):
                                Move(sq.a4, sq.c5, capture='p'),
                                Move(sq.a4, sq.c3, capture='p'),
                                Move(sq.a4, sq.b2, capture='p')])
+
+
+class BishopMoveTest(unittest.TestCase):
+    def test_mixed_moves(self):
+        b = Board('k2n4/8/1B6/8/8/8/8/K7 w - - 0 1')
+        sq = SquareHelper()
+        self.assertItemsEqual(gen_bishop_moves(b, sq.b6),
+                              [Move(sq.b6, sq.a7),
+                               Move(sq.b6, sq.a5),
+                               Move(sq.b6, sq.c7),
+                               Move(sq.b6, sq.d8, capture='n'),
+                               Move(sq.b6, sq.c5),
+                               Move(sq.b6, sq.d4),
+                               Move(sq.b6, sq.e3),
+                               Move(sq.b6, sq.f2),
+                               Move(sq.b6, sq.g1)])
+
+
+class RookMoveTest(unittest.TestCase):
+    def test_mixed_moves(self):
+        b = Board('k7/p7/8/R2P4/8/8/8/K7 w - - 0 1')
+        sq = SquareHelper()
+        self.assertItemsEqual(gen_rook_moves(b, sq.a5),
+                              [Move(sq.a5, sq.a6),
+                               Move(sq.a5, sq.a7, capture='p'),
+                               Move(sq.a5, sq.b5),
+                               Move(sq.a5, sq.c5),
+                               Move(sq.a5, sq.a4),
+                               Move(sq.a5, sq.a3),
+                               Move(sq.a5, sq.a2)])
+
+
+class QueenMoveTest(unittest.TestCase):
+    def test_mixed_moves(self):
+        b = Board('k7/p7/1p6/Q2P4/8/8/8/K7 w - - 0 1')
+        sq = SquareHelper()
+        self.assertItemsEqual(gen_queen_moves(b, sq.a5),
+                              [Move(sq.a5, sq.a6),
+                               Move(sq.a5, sq.a7, capture='p'),
+                               Move(sq.a5, sq.b5),
+                               Move(sq.a5, sq.c5),
+                               Move(sq.a5, sq.a4),
+                               Move(sq.a5, sq.a3),
+                               Move(sq.a5, sq.a2),
+                               Move(sq.a5, sq.b6, capture='p'),
+                               Move(sq.a5, sq.b4),
+                               Move(sq.a5, sq.c3),
+                               Move(sq.a5, sq.d2),
+                               Move(sq.a5, sq.e1)])
+
+
+class KingMoveTest(unittest.TestCase):
+    def test_mixed_moves(self):
+        b = Board('k7/8/3ppP2/4K3/4N3/8/8/8 w - - 0 1')
+        sq = SquareHelper()
+        self.assertItemsEqual(gen_king_moves(b, sq.e5),
+                              [Move(sq.e5, sq.d6, capture='p'),
+                               Move(sq.e5, sq.e6, capture='p'),
+                               Move(sq.e5, sq.f5),
+                               Move(sq.e5, sq.d5),
+                               Move(sq.e5, sq.d4),
+                               Move(sq.e5, sq.f4)])
 
 
 class MoveGenTest(unittest.TestCase):

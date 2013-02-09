@@ -1,9 +1,11 @@
 """Move generator"""
 
+from itertools import chain
+
 from smash.move import Move
 from smash.board import \
     pair2square, rank, col, get_side
-from smash.movetables import knight_table
+from smash.movetables import knight_table, bishop_table, rook_table, king_table
 
 
 movefunc = {}
@@ -76,22 +78,56 @@ def gen_pawn_moves(board, src):
             yield Move(src, nextsq, capture=b[src].swapcase())
 
 
-def gen_knight_moves(board, src):
+def _gen_ray_moves(board, src, rays):
     b = board.raw
     stm = board.stm
 
-    for dst in knight_table[src]:
+    for ray in rays:
+        for dst in ray:
+            if b[dst] != ' ':
+                if get_side(b[dst]) != stm:
+                    yield Move(src, dst, capture=b[dst])
+                break
+            else:
+                yield Move(src, dst)
+
+
+def gen_bishop_moves(board, src):
+    return _gen_ray_moves(board, src, bishop_table[src])
+
+
+def gen_rook_moves(board, src):
+    return _gen_ray_moves(board, src, rook_table[src])
+
+
+def gen_queen_moves(board, src):
+    return _gen_ray_moves(board, src, chain(bishop_table[src], rook_table[src]))
+
+
+def _gen_simple_moves(board, src, dsts):
+    b = board.raw
+    stm = board.stm
+
+    for dst in dsts:
         if b[dst] != ' ':
             if get_side(b[dst]) != stm:
                 yield Move(src, dst, capture=b[dst])
         else:
             yield Move(src, dst)
+        
 
+def gen_knight_moves(board, src):
+    return _gen_simple_moves(board, src, knight_table[src])
+
+
+def gen_king_moves(board, src):
+    return _gen_simple_moves(board, src, king_table[src])
+    
 
 movefunc[' '] = gen_empty_moves
 movefunc['p'] = gen_pawn_moves
 movefunc['n'] = gen_knight_moves
-movefunc['b'] = gen_empty_moves
-movefunc['r'] = gen_empty_moves
-movefunc['q'] = gen_empty_moves
-movefunc['k'] = gen_empty_moves
+movefunc['b'] = gen_bishop_moves
+movefunc['r'] = gen_rook_moves
+movefunc['q'] = gen_queen_moves
+movefunc['k'] = gen_king_moves
