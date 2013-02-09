@@ -256,6 +256,11 @@ class BaseBoard(object):
     def can_attack(self, stm, sq):
         raise NotImplemented()
 
+    def is_legal(self):
+        xking = {'w': 'k', 'b': 'K'}[self.stm]
+        sq = np.where(self.raw == xking)[0][0]
+        return not self.can_attack(self.stm, sq)
+
     def _is_checked(self):
         king = {'w': 'K', 'b': 'k'}[self.stm]
         sq = np.where(self.raw == king)[0][0]

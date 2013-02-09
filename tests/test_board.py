@@ -67,6 +67,22 @@ check_fixtures = [
     ('k7/8/8/8/8/R7/8/K7 w - - 0 1', False),
     ]
 
+legal_fixtures = [
+    ('k7/8/8/8/8/8/p7/K7 b - - 0 1', True),
+    ('k7/8/8/8/8/8/1p6/K7 b - - 0 1', False),
+    ('k7/8/8/8/8/8/1p6/1K6 b - - 0 1', True),
+    ('k7/8/8/8/8/8/2p5/1K6 b - - 0 1', False),
+    ('k7/8/8/8/8/8/2P5/1K6 b - - 0 1', True),
+    ('k7/8/8/8/8/8/1b6/K7 b - - 0 1', False),
+    ('k7/8/8/8/8/2b5/8/K7 b - - 0 1', False),
+    ('k7/8/8/8/8/2Q5/8/K7 b - - 0 1', True),
+    ('k7/8/8/8/8/2q5/8/K7 b - - 0 1', False),
+    ('k7/8/8/8/8/2r5/8/K7 b - - 0 1', True),
+    ('k7/8/8/8/8/r7/8/K7 b - - 0 1', False),
+    ('k7/8/8/8/8/q7/8/K7 b - - 0 1', False),
+    ('k7/8/8/8/8/R7/8/K7 b - - 0 1', True),
+    ]
+
 
 class BoardMoveTest(unittest.TestCase):
     def test_move(self):
@@ -92,4 +108,12 @@ class BoardCheckTest(unittest.TestCase):
         for i, (fen, checked) in enumerate(check_fixtures, 1):
             b = Board(fen)
             self.assertEquals(b.checked, checked,
-                              msg='Failed at n. %s\n%s (%s)' % (i, fen, checked))
+                              msg='Failed at n. %s\n%s (exp: %s)' % (i, fen, checked))
+
+
+class BoardLegalTest(unittest.TestCase):
+    def test_legal(self):
+        for i, (fen, legal) in enumerate(legal_fixtures, 1):
+            b = Board(fen)
+            self.assertEquals(b.is_legal(), legal,
+                              msg='Failed at n. %s\n%s (exp: %s)' % (i, fen, legal))
