@@ -5,7 +5,7 @@ from itertools import chain
 import numpy as np
 
 from smash.move import Move
-from smash.base import pair2square, rank, col, get_side
+from smash.base import pair2square, rank, col, get_side, swap_side
 from smash.movetables import knight_table, bishop_table, rook_table, king_table
 
 
@@ -81,11 +81,10 @@ def gen_pawn_moves(board, src):
             yield Move(src, nextsq, capture=b[src].swapcase())
 
 
-def _gen_ray_moves(board, src, rays):
+def _gen_ray_moves(board, src, rays, stm):
     """Generate table based ray moves (i.e. bishop/rook moves)"""
 
     b = board.raw
-    stm = board.stm
 
     for ray in rays:
         for dst in ray:
@@ -97,29 +96,34 @@ def _gen_ray_moves(board, src, rays):
                 yield Move(src, dst)
 
 
-def gen_bishop_moves(board, src):
+def gen_bishop_moves(board, src, stm=None):
     """Generate bishop moves"""
 
-    return _gen_ray_moves(board, src, bishop_table[src])
+    if stm is None:
+        stm = board.stm
+    return _gen_ray_moves(board, src, bishop_table[src], stm)
 
 
-def gen_rook_moves(board, src):
+def gen_rook_moves(board, src, stm=None):
     """Generate rook moves"""
 
-    return _gen_ray_moves(board, src, rook_table[src])
+    if stm is None:
+        stm = board.stm
+    return _gen_ray_moves(board, src, rook_table[src], stm)
 
 
-def gen_queen_moves(board, src):
+def gen_queen_moves(board, src, stm=None):
     """Generate queen moves"""
 
-    return _gen_ray_moves(board, src, chain(bishop_table[src], rook_table[src]))
+    if stm is None:
+        stm = board.stm
+    return _gen_ray_moves(board, src, chain(bishop_table[src], rook_table[src]), stm)
 
 
-def _gen_simple_moves(board, src, dsts):
+def _gen_simple_moves(board, src, dsts, stm):
     """Generate simple table base moves (i.e. king/knight)"""
 
     b = board.raw
-    stm = board.stm
 
     for dst in dsts:
         if b[dst] != ' ':
@@ -129,16 +133,49 @@ def _gen_simple_moves(board, src, dsts):
             yield Move(src, dst)
         
 
-def gen_knight_moves(board, src):
+def gen_knight_moves(board, src, stm=None):
     """Generate knight moves"""
 
-    return _gen_simple_moves(board, src, knight_table[src])
+    if stm is None:
+        stm = board.stm
+
+    return _gen_simple_moves(board, src, knight_table[src], stm)
 
 
-def gen_king_moves(board, src):
+def gen_king_moves(board, src, stm=None, do_castling=True):
     """Generate king moves"""
 
-    return _gen_simple_moves(board, src, king_table[src])
+    if stm is None:
+        stm = board.stm
+
+    for m in _gen_simple_moves(board, src, king_table[src], stm):
+        yield m
+
+    if do_castling:
+        for m in _gen_castling_moves(board, src, stm):
+            yield m
+
+
+def _gen_castling_moves(board, src, stm):
+    b = board.raw
+    ks_dst = src + 2
+    ks_transit = src + 1
+    qs_dst = src - 2
+    qs_transit = src - 1
+    if stm == 'w':
+        ks = 'K'
+        qs = 'Q'
+    else:
+        ks = 'k'
+        qs = 'q'
+
+    xside = swap_side(stm)
+    if board.castling[ks] and b[ks_transit] == ' ' and b[ks_dst] == ' ' \
+            and not board.can_attack(xside, ks_transit):
+        yield Move(src, ks_dst)
+    if board.castling[qs] and b[qs_transit] == ' ' and b[qs_dst] == ' ' \
+            and not board.can_attack(xside, ks_transit):
+        yield Move(src, qs_dst)
     
 
 movefunc['p'] = gen_pawn_moves

@@ -41,9 +41,11 @@ move_fixtures = [
     ('k7/8/8/pP6/8/8/8/K7 w - a6 0 1',
      Move(sq.b5, sq.a6, capture='p'),
      'k7/8/P7/8/8/8/8/K7 b - - 0 2'),
+    # queen side castling
     ('4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1',
      Move(sq.e1, sq.c1),
      '4k3/8/8/8/8/8/8/2KR3R b - - 0 2'),
+    # king side castling
     ('4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1',
      Move(sq.e1, sq.g1),
      '4k3/8/8/8/8/8/8/R4RK1 b - - 0 2'),
@@ -71,20 +73,23 @@ class BoardMoveTest(unittest.TestCase):
         for i, (start_fen, move, end_fen) in enumerate(move_fixtures, 1):
             b = Board(start_fen)
             b.move(move)
-            self.assertEquals(b.fen(), end_fen,
-                              msg='Failed at n. %s:\n%r != %r' % (i, b.fen(), end_fen))
+            r = b.fen()
+            self.assertEquals(r, end_fen,
+                              msg='Failed at n. %s:\n%r != %r' % (i, r, end_fen))
 
     def test_undo(self):
         for i, (start_fen, move, _) in enumerate(move_fixtures, 1):
             b = Board(start_fen)
             b.move(move)
             b.undo()
-            self.assertEquals(b.fen(), start_fen,
-                              msg='Failed at n. %s:\n%r != %r' % (i, b.fen(), start_fen))
+            r = b.fen()
+            self.assertEquals(r, start_fen,
+                              msg='Failed at n. %s:\n%r != %r' % (i, r, start_fen))
 
 
 class BoardCheckTest(unittest.TestCase):
     def test_check_status(self):
         for i, (fen, checked) in enumerate(check_fixtures, 1):
             b = Board(fen)
-            self.assertEquals(b.checked, checked, msg='Failed at n. %s' % i)
+            self.assertEquals(b.checked, checked,
+                              msg='Failed at n. %s\n%s (%s)' % (i, fen, checked))

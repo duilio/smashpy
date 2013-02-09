@@ -72,7 +72,7 @@ class BaseBoard(object):
         self._en_passant = squares.get(en_passant, None)
         self._rule50 = int(rule50)
         self._movecnt = int(movecnt)
-        self._checked = self.set_check_status()
+        self._checked = self._is_checked()
         self._set_hashkey()
 
         self._history = [TransitionStatus(None, self.castling.copy(),
@@ -185,7 +185,7 @@ class BaseBoard(object):
         self._stm = swap_side(self.stm)
         self._set_hashkey()
 
-        self.set_check_status()
+        self._checked = self._is_checked()
         
         self._history.append(TransitionStatus(m, self.castling.copy(),
                                               self._en_passant, self._rule50,
@@ -253,8 +253,13 @@ class BaseBoard(object):
     def checked(self):
         return self._checked
 
-    def set_check_status(self):
+    def can_attack(self, stm, sq):
         raise NotImplemented()
+
+    def _is_checked(self):
+        king = {'w': 'K', 'b': 'k'}[self.stm]
+        sq = np.where(self.raw == king)[0][0]
+        return self.can_attack(swap_side(self.stm), sq)
 
     def _set_hashkey(self):
         self._hashkey = hash((self.stm, ''.join(self.raw), self.en_passant,
