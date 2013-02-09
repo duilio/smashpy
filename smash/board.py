@@ -21,12 +21,12 @@ class Board(BaseBoard):
 
         other = {'w': 'bq', 'b': 'BQ'}[self.stm]
         for m in gen_bishop_moves(self, sq):
-            if m.capture in other:
+            if m.capture and m.capture in other:
                 return True
 
         other = {'w': 'rq', 'b': 'RQ'}[self.stm]
         for m in gen_rook_moves(self, sq):
-            if m.capture in other:
+            if m.capture and m.capture in other:
                 return True
 
         r = rank(sq)
@@ -37,11 +37,11 @@ class Board(BaseBoard):
         else:
             r -= 1
 
-        other = {'w': 'p', 'b': 'P'}
+        other = {'w': 'p', 'b': 'P'}[self.stm]
         if 0 <= r <= 7:
             if c > 0 and self.raw[pair2square(r, c - 1)] == other:
                 return True
-            elif c < 7 and self.raw[pair2square(r, c + 1)] == other:
+            if c < 7 and self.raw[pair2square(r, c + 1)] == other:
                 return True
 
         return False

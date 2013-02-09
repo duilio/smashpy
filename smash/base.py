@@ -235,6 +235,10 @@ class BaseBoard(object):
     def castling(self):
         return self._castling
 
+    @property
+    def checked(self):
+        return self._checked
+
     def set_check_status(self):
         raise NotImplemented()
 
