@@ -1,1 +1,2 @@
-from board import Board
+from smash.board import Board, START_POSITION
+

@@ -133,10 +133,10 @@ class BaseBoard(object):
         # check if rook or king moved and set castling values
         if p in 'Rr':
             castling_side = {(0, 'w'): 'Q',
-                             (0, 'b'): 'q',
+                             (56, 'b'): 'q',
                              (7, 'w'): 'K',
-                             (7, 'b'): 'k'}[(col(m.src), self.stm)]
-            if self._castling[castling_side]:
+                             (63, 'b'): 'k'}.get((m.src, self.stm), None)
+            if castling_side and self._castling[castling_side]:
                 self._castling[castling_side] = 0
                 irreversible = True
         elif p in 'Kk':
