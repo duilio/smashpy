@@ -41,6 +41,9 @@ move_fixtures = [
     ('k7/8/8/pP6/8/8/8/K7 w - a6 0 1',
      Move(sq.b5, sq.a6, capture='p'),
      'k7/8/P7/8/8/8/8/K7 b - - 0 2'),
+    ('4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1',
+     Move(sq.e1, sq.c1),
+     '4k3/8/8/8/8/8/8/2KR3R b - - 0 2'),
     ]
 
 check_fixtures = [
@@ -62,17 +65,19 @@ check_fixtures = [
 
 class BoardMoveTest(unittest.TestCase):
     def test_move(self):
-        for start_fen, move, end_fen in move_fixtures:
+        for i, (start_fen, move, end_fen) in enumerate(move_fixtures, 1):
             b = Board(start_fen)
             b.move(move)
-            self.assertEquals(b.fen(), end_fen)
+            self.assertEquals(b.fen(), end_fen,
+                              msg='Failed at n. %s:\n%r != %r' % (i, b.fen(), end_fen))
 
     def test_undo(self):
         for i, (start_fen, move, _) in enumerate(move_fixtures, 1):
             b = Board(start_fen)
             b.move(move)
             b.undo()
-            self.assertEquals(b.fen(), start_fen, msg='Failed at n. %s' % i)
+            self.assertEquals(b.fen(), start_fen,
+                              msg='Failed at n. %s:\n%r != %r' % (i, b.fen(), start_fen))
 
 
 class BoardCheckTest(unittest.TestCase):

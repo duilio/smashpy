@@ -167,9 +167,9 @@ class BaseBoard(object):
             irreversible = True
         elif p in 'Kk' and abs(col(m.src) - col(m.dst)) == 2:
             # if it is a castling move then move also the rook
+            r = rank(m.dst)
             c = col(m.dst)
-            r = col(m.dst)
-            if col(m.dst) == 2:
+            if c == 2:
                 r_src = pair2square(r, 0)
                 r_dst = pair2square(r, c+1)
             else:
@@ -210,6 +210,20 @@ class BaseBoard(object):
             b[EN_PASSANT_CAPTURES[m.dst]] = {'w': 'p', 'b': 'P'}[stm]
         elif m.capture:
             b[m.dst] = m.capture
+
+        if b[m.src] in 'Kk' and abs(col(m.dst) - col(m.src)) == 2:
+            r = rank(m.dst)
+            c = col(m.dst)
+
+            if c == 2:
+                r_src = pair2square(r, 0)
+                r_dst = pair2square(r, c+1)
+            else:
+                r_src = pair2square(r, 7)
+                r_dst = pair2square(r, c-1)
+
+            b[r_src] = b[r_dst]
+            b[r_dst] = ' '
 
         self._stm = stm
         self._movecnt -= 1
