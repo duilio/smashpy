@@ -3,8 +3,7 @@
 import sys
 import argparse
 
-from smash import Board, START_POSITION, Move
-from smash.base import squares
+from smash import Board, START_POSITION
 from smash.perft import perft
 
 
@@ -16,11 +15,14 @@ def main():
         title='Commands', description='smash builtin commands')
 
     perft_parser = subparsers.add_parser('perft', help='Run perft')
-    perft_parser.add_argument('depth', metavar='DEPTH', default=1, type=int, nargs='?')
+    perft_parser.add_argument('depth', metavar='DEPTH', default=1, type=int,
+                              nargs='?')
     perft_parser.set_defaults(cmd=run_perft)
 
-    explore_parser = subparsers.add_parser('explore', help='Run perft after first move generation')
-    explore_parser.add_argument('depth', metavar='DEPTH', default=1, type=int, nargs='?')
+    explore_parser = subparsers.add_parser(
+        'explore', help='Run perft after first move generation')
+    explore_parser.add_argument('depth', metavar='DEPTH', default=1, type=int,
+                                nargs='?')
     explore_parser.set_defaults(cmd=run_explore)
 
     shell_parser = subparsers.add_parser('shell', help='Run smash shell')
@@ -37,6 +39,11 @@ def run_perft(args):
 
 
 def run_explore(args):
+    """Generate the first level of moves and then run perft.
+
+    Useful for debugging if a perft result doesn't match.
+
+    """
     from smash.movegen import gen_moves
     
     board = Board(args.fen)
@@ -52,10 +59,14 @@ def run_explore(args):
 
 
 def run_shell(args):
-    from smash.movegen import gen_moves
+    """Open a python shell with some useful commands"""
     
     import code
     from itertools import izip_longest
+
+    from smash.move import Move
+    from smash.movegen import gen_moves
+    from smash.base import squares
 
     board = Board(args.fen)
 
@@ -104,9 +115,18 @@ def run_shell(args):
         pass
     else:
         import rlcompleter
-        readline.set_completer(rlcompleter.Completer(imported_objects).complete)
+        readline.set_completer(
+            rlcompleter.Completer(imported_objects).complete)
         readline.parse_and_bind('tab:complete')
-    code.interact(local=imported_objects)
+
+    banner = """
+smash %s
+Shell interpreter.
+
+%s
+%s
+""" % ('0.2', str(board), board.fen())
+    code.interact(local=imported_objects, banner=banner.strip())
 
 if __name__ == '__main__':
     sys.exit(main())
