@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+
+import sys
+import argparse
+
+from smash import Board, START_POSITION, Move
+from smash.base import squares
+from smash.perft import perft
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--fen', default=START_POSITION)
+
+    subparsers = parser.add_subparsers(
+        title='Commands', description='smash builtin commands')
+
+    perft_parser = subparsers.add_parser('perft', help='Run perft')
+    perft_parser.add_argument('depth', metavar='DEPTH', default=1, type=int, nargs='?')
+    perft_parser.set_defaults(cmd=run_perft)
+
+    explore_parser = subparsers.add_parser('explore', help='Run perft after first move generation')
+    explore_parser.add_argument('depth', metavar='DEPTH', default=1, type=int, nargs='?')
+    explore_parser.set_defaults(cmd=run_explore)
+
+    shell_parser = subparsers.add_parser('shell', help='Run smash shell')
+    shell_parser.set_defaults(cmd=run_shell)
+    
+    args = parser.parse_args()
+    args.cmd(args)
+
+
+def run_perft(args):
+    board = Board(args.fen)
+    print board
+    print perft(board, args.depth, 0)
+
+
+def run_explore(args):
+    from smash.movegen import gen_moves
+    
+    board = Board(args.fen)
+
+    for m in gen_moves(board):
+        board.move(m)
+        if board.is_legal():
+            r = perft(board, args.depth, 0)
+            print 'position fen %s' % board.fen()
+            print 'perft %s' % args.depth
+            print '# result: %s' % r
+        board.undo()
+
+
+def run_shell(args):
+    from smash.movegen import gen_moves
+    
+    import code
+    from itertools import izip_longest
+
+    board = Board(args.fen)
+
+    def move_helper(*args, **kwargs):
+        if len(args) + len(kwargs) == 1:
+            board.move(*args, **kwargs)
+        else:
+            m = Move(*args, **kwargs)
+            board.move(m)
+        show_helper()
+
+    def undo_helper():
+        board.undo()
+        show_helper()
+
+    def show_helper():
+        print board
+        print board.fen()
+
+    def perft_helper(depth):
+        print perft(board, depth, 0)
+
+    def movelist_helper():
+        r = []
+        for m in gen_moves(board):
+            board.move(m)
+            if board.is_legal():
+                r.append(m.str_simple())
+            board.undo()
+        r = iter(r)
+        for row in izip_longest(*[r]*4, fillvalue=''):
+            print ' '.join(row)
+
+    imported_objects = dict(b=board,
+                            move=move_helper,
+                            undo=undo_helper,
+                            fen=board.fen,
+                            show=show_helper,
+                            perft=perft_helper,
+                            movelist=movelist_helper, )
+    imported_objects.update(squares)
+
+    try:
+        import readline
+    except ImportError:
+        pass
+    else:
+        import rlcompleter
+        readline.set_completer(rlcompleter.Completer(imported_objects).complete)
+        readline.parse_and_bind('tab:complete')
+    code.interact(local=imported_objects)
+
+if __name__ == '__main__':
+    sys.exit(main())
