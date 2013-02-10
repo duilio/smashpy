@@ -151,7 +151,7 @@ def gen_king_moves(board, src, stm=None, do_castling=True):
     for m in _gen_simple_moves(board, src, king_table[src], stm):
         yield m
 
-    if do_castling:
+    if do_castling and not board.checked:
         for m in _gen_castling_moves(board, src, stm):
             yield m
 
@@ -162,6 +162,7 @@ def _gen_castling_moves(board, src, stm):
     ks_transit = src + 1
     qs_dst = src - 2
     qs_transit = src - 1
+    qs_transit_rook = src - 3
     if stm == 'w':
         ks = 'K'
         qs = 'Q'
@@ -173,8 +174,8 @@ def _gen_castling_moves(board, src, stm):
     if board.castling[ks] and b[ks_transit] == ' ' and b[ks_dst] == ' ' \
             and not board.can_attack(xside, ks_transit):
         yield Move(src, ks_dst)
-    if board.castling[qs] and b[qs_transit] == ' ' and b[qs_dst] == ' ' \
-            and not board.can_attack(xside, ks_transit):
+    if board.castling[qs] and b[qs_transit] == ' ' and b[qs_transit_rook] == ' ' \
+            and b[qs_dst] == ' ' and not board.can_attack(xside, ks_transit):
         yield Move(src, qs_dst)
     
 

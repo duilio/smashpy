@@ -168,6 +168,37 @@ class KingMoveTest(unittest.TestCase):
                                Move(sq.e1, sq.c1),
                                Move(sq.e1, sq.g1)])
 
+    def test_castling_not_allowed_attacked(self):
+        b = Board('4k3/8/8/8/8/8/4p3/R3K2R w KQ - 0 1')
+        sq = SquareHelper()
+        self.assertItemsEqual(gen_king_moves(b, sq.e1),
+                              [Move(sq.e1, sq.e2, capture='p'),
+                               Move(sq.e1, sq.d2),
+                               Move(sq.e1, sq.d1),
+                               Move(sq.e1, sq.f1),
+                               Move(sq.e1, sq.f2)])
+
+    def test_castling_now_allowed_checked(self):
+        b = Board('4k3/8/8/8/8/8/3p4/R3K2R w KQ - 0 1')
+        sq = SquareHelper()
+        self.assertItemsEqual(gen_king_moves(b, sq.e1),
+                              [Move(sq.e1, sq.e2),
+                               Move(sq.e1, sq.d2, capture='p'),
+                               Move(sq.e1, sq.f2),
+                               Move(sq.e1, sq.d1),
+                               Move(sq.e1, sq.f1)])
+
+    def test_castling_not_allowed_qs_blocked(self):
+        b = Board('4k3/8/8/8/8/8/8/RN2K2R w KQ - 0 1')
+        sq = SquareHelper()
+        self.assertItemsEqual(gen_king_moves(b, sq.e1),
+                              [Move(sq.e1, sq.e2),
+                               Move(sq.e1, sq.f1),
+                               Move(sq.e1, sq.f2),
+                               Move(sq.e1, sq.d1),
+                               Move(sq.e1, sq.d2),
+                               Move(sq.e1, sq.g1)])
+
 
 class MoveGenTest(unittest.TestCase):
     def test_start_position(self):
