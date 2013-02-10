@@ -49,6 +49,19 @@ move_fixtures = [
     ('4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1',
      Move(sq.e1, sq.g1),
      '4k3/8/8/8/8/8/8/R4RK1 b - - 0 2'),
+    # capture king side rook
+    ('4k3/8/8/8/8/8/5n2/R3K2R b KQ - 0 1',
+     Move(sq.f2, sq.h1, capture='R'),
+     '4k3/8/8/8/8/8/8/R3K2n w Q - 0 2'),
+    # capture queen side rook
+    ('4k3/8/8/8/8/8/2n5/R3K2R b KQ - 0 1',
+     Move(sq.c2, sq.a1, capture='R'),
+     '4k3/8/8/8/8/8/8/n3K2R w K - 0 2'),
+    # capture king side rook (again)
+    ('rnbqkb1r/pp1p1ppp/2p5/4P3/2B5/N7/PPP1NnPP/R1BQK2R b KQkq - 1 7',
+     Move(sq.f2, sq.h1, capture='R'),
+     'rnbqkb1r/pp1p1ppp/2p5/4P3/2B5/N7/PPP1N1PP/R1BQK2n w Qkq - 0 8'),
+    
     ]
 
 check_fixtures = [

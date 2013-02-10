@@ -5,6 +5,7 @@ from collections import namedtuple
 pieces = ' PNBRQK pnbrqk'
 squares = [''.join([c, r]) for r in '12345678' for c in 'abcdefgh']
 squares = {label: idx for idx, label in enumerate(squares)}
+squares_inv = {idx: label for label, idx in squares.iteritems()}
 sides = 'wb'
 
 
@@ -165,6 +166,17 @@ class BaseBoard(object):
         elif m.capture:
             self._rule50 = 0
             irreversible = True
+
+            # if a rook is captures, check if castling flags should be changed
+            if m.capture in 'Rr':
+                castling_side = {(0, 'b'): 'Q',
+                                 (56, 'w'): 'q',
+                                 (7, 'b'): 'K',
+                                 (63, 'w'): 'k'}.get((m.dst, self.stm), None)
+                if castling_side and self._castling[castling_side]:
+                    self._castling[castling_side] = 0
+                    irreversible = True
+            
         elif p in 'Kk' and abs(col(m.src) - col(m.dst)) == 2:
             # if it is a castling move then move also the rook
             r = rank(m.dst)

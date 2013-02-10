@@ -175,7 +175,7 @@ def _gen_castling_moves(board, src, stm):
             and not board.can_attack(xside, ks_transit):
         yield Move(src, ks_dst)
     if board.castling[qs] and b[qs_transit] == ' ' and b[qs_transit_rook] == ' ' \
-            and b[qs_dst] == ' ' and not board.can_attack(xside, ks_transit):
+            and b[qs_dst] == ' ' and not board.can_attack(xside, qs_transit):
         yield Move(src, qs_dst)
     
 

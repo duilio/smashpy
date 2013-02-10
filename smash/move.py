@@ -1,3 +1,6 @@
+from base import squares_inv
+
+
 class Move(object):
     __slot__ = ['src', 'dst', 'en_passant', 'capture', 'promote']
 
@@ -25,3 +28,6 @@ class Move(object):
 
     def _tuple(self):
         return (self.src, self.dst, self.en_passant, self.capture, self.promote)
+
+    def str_simple(self):
+        return squares_inv[self.src] + squares_inv[self.dst]

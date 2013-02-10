@@ -1,4 +1,4 @@
-from movegen import gen_moves
+from smash.movegen import gen_moves
 
 
 def perft(board, depth, ply):

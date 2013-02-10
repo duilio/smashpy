@@ -168,6 +168,14 @@ class KingMoveTest(unittest.TestCase):
                                Move(sq.e1, sq.c1),
                                Move(sq.e1, sq.g1)])
 
+    def test_castling_allowed_one_side(self):
+        b = Board('r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q2/PPPBBPpP/R3K1R1 w Qkq - 0 3')
+        sq = SquareHelper()
+        self.assertItemsEqual(gen_king_moves(b, sq.e1),
+                              [Move(sq.e1, sq.d1),
+                               Move(sq.e1, sq.f1),
+                               Move(sq.e1, sq.c1)])
+
     def test_castling_not_allowed_attacked(self):
         b = Board('4k3/8/8/8/8/8/4p3/R3K2R w KQ - 0 1')
         sq = SquareHelper()
