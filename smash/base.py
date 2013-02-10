@@ -267,8 +267,8 @@ class BaseBoard(object):
         return self.can_attack(swap_side(self.stm), sq)
 
     def _set_hashkey(self):
-        self._hashkey = hash((self.stm, ''.join(self.raw), self.en_passant,
-                              tuple(self.castling.items())))
+        self._hashkey = hash((self.stm, tuple(self.raw), self.en_passant,
+                              tuple(self.castling.iteritems())))
                              
 TransitionStatus = namedtuple('TransitionStatus',
                               'move castling en_passant rule50 checked hashkey irreversible')

@@ -178,6 +178,48 @@ def _gen_castling_moves(board, src, stm):
         yield Move(src, qs_dst)
     
 
+def _gen_ray_captures(board, src, rays, stm):
+    b = board.raw
+    for ray in rays:
+        for dst in ray:
+            if b[dst] != ' ':
+                if get_side(b[dst]) != stm:
+                    yield b[dst]
+                break
+
+
+def _gen_simple_captures(board, src, dsts, stm):
+    b = board.raw
+    for dst in dsts:
+        if b[dst] != ' ':
+            if get_side(b[dst]) != stm:
+                yield b[dst]
+
+
+def gen_knight_captures(board, src, stm=None):
+    stm = stm or board.stm
+    for m in _gen_simple_captures(board, src, knight_table[src], stm):
+        yield m
+
+
+def gen_king_captures(board, src, stm=None):
+    stm = stm or board.stm
+    for m in _gen_simple_captures(board, src, king_table[src], stm):
+        yield m
+
+
+def gen_bishop_captures(board, src, stm=None):
+    stm = stm or board.stm
+    for m in _gen_ray_captures(board, src, bishop_table[src], stm):
+        yield m
+
+
+def gen_rook_captures(board, src, stm=None):
+    stm = stm or board.stm
+    for m in _gen_ray_captures(board, src, rook_table[src], stm):
+        yield m
+
+
 movefunc['p'] = gen_pawn_moves
 movefunc['n'] = gen_knight_moves
 movefunc['b'] = gen_bishop_moves
