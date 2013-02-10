@@ -6,7 +6,10 @@ import numpy as np
 
 from smash.move import Move
 from smash.base import pair2square, rank, col, get_side, swap_side
-from smash.movetables import knight_table, bishop_table, rook_table, king_table
+try:
+    from smash.movetables import knight_table, bishop_table, rook_table, king_table
+except ImportError:
+    pass
 
 
 movefunc = {}

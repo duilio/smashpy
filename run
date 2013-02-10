@@ -3,8 +3,7 @@
 import sys
 import argparse
 
-from smash import Board, START_POSITION
-from smash.perft import perft
+from smash.board import Board, START_POSITION
 
 
 def main():
@@ -14,6 +13,12 @@ def main():
     subparsers = parser.add_subparsers(
         title='Commands', description='smash builtin commands')
 
+    shell_parser = subparsers.add_parser('shell', help='Run smash shell')
+    shell_parser.set_defaults(cmd=run_shell)
+    
+    gentables_parser = subparsers.add_parser('gentables', help='Generate static tables')
+    gentables_parser.set_defaults(cmd=run_gentables)
+    
     perft_parser = subparsers.add_parser('perft', help='Run perft')
     perft_parser.add_argument('depth', metavar='DEPTH', default=1, type=int,
                               nargs='?')
@@ -25,14 +30,18 @@ def main():
                                 nargs='?')
     explore_parser.set_defaults(cmd=run_explore)
 
-    shell_parser = subparsers.add_parser('shell', help='Run smash shell')
-    shell_parser.set_defaults(cmd=run_shell)
-    
     args = parser.parse_args()
     args.cmd(args)
 
 
+def run_gentables(args):
+    from smash.tools.gentables import gen_tables
+    print gen_tables()
+    
+
 def run_perft(args):
+    from smash.perft import perft
+
     board = Board(args.fen)
     print board
     print perft(board, args.depth, 0)
@@ -45,6 +54,7 @@ def run_explore(args):
 
     """
     from smash.movegen import gen_moves
+    from smash.perft import perft
     
     board = Board(args.fen)
 
@@ -67,6 +77,7 @@ def run_shell(args):
     from smash.move import Move
     from smash.movegen import gen_moves
     from smash.base import squares
+    from smash.perft import perft
 
     board = Board(args.fen)
 
