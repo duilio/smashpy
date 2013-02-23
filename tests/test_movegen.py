@@ -156,6 +156,18 @@ class KingMoveTest(unittest.TestCase):
                                Move(sq.e5, sq.d4),
                                Move(sq.e5, sq.f4)])
 
+        b = Board('k7/8/8/8/1p6/3N4/pK6/8 w - - 1 2')
+        sq = SquareHelper()
+        self.assertItemsEqual(gen_king_moves(b, sq.b2),
+                              [Move(sq.b2, sq.a1),
+                               Move(sq.b2, sq.b1),
+                               Move(sq.b2, sq.c1),
+                               Move(sq.b2, sq.c2),
+                               Move(sq.b2, sq.c3),
+                               Move(sq.b2, sq.b3),
+                               Move(sq.b2, sq.a3),
+                               Move(sq.b2, sq.a2, capture='p')])
+
     def test_castling(self):
         b = Board('4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1')
         sq = SquareHelper()

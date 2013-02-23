@@ -45,7 +45,7 @@ def gen_simple_table(dirs):
         table.append([])
         for dr, dc in dirs:
             dst = check_pair2square(r + dr, c + dc)
-            if dst:
+            if dst is not None:
                 table[src].append(dst)
     return table
 
