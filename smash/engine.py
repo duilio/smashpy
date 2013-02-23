@@ -1,3 +1,4 @@
+import time
 from contextlib import contextmanager
 
 from smash.evaluate import INF, evaluate
@@ -21,6 +22,20 @@ def mate_score(ply):
     return -(INF - ply)
 
 
+class Stat(object):
+    __slots__ = ['nodes', 'leaves', 'mates', 'draws', 't_start']
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.t_start = time.time()
+        self.nodes = 0
+        self.leaves = 0
+        self.mates = 0
+        self.draws = 0
+
+
 class Engine(object):
     DEFAULT_CONFIG = {
         'depth': 4,
@@ -32,6 +47,7 @@ class Engine(object):
     def __init__(self, **config):
         self.config = self.DEFAULT_CONFIG.copy()
         self.config.update(config)
+        self.stat = Stat()
 
     def check_end(self, board, ply):
         """Check the end of a game
@@ -54,7 +70,9 @@ class Engine(object):
     def bestmove(self, board):
         """Returns the best move and its score"""
 
+        self.stat.reset()
         score, move = self._search(board, self.config['depth'])
+        self.send_info(depth=self.config['depth'], score=score, pv=[move])
         return (move, score)
 
     def stop(self):
@@ -67,11 +85,19 @@ class Engine(object):
         assert ply >= 1
         assert board.is_legal()
 
+        stat = self.stat
+        stat.nodes += 1
+
         # the search terminates at depth = 0
         # just check for a mate/draw or returns an heuristic score
         if depth == 0:
+            stat.leaves += 1
             score = self.check_end(board, ply)
             if score is not None:
+                if score == 0:
+                    stat.draws += 1
+                else:
+                    stat.mates += 1
                 return score, None
 
             return evaluate(board), None
@@ -93,9 +119,19 @@ class Engine(object):
 
         # if no move was found, then we must be in an game over
         if bestmove is None:
+            stat.leaves += 1
             if board.checked:
+                stat.mates += 1
                 return -INF, None
             else:
+                stat.draws += 1
                 return 0, None
 
         return alpha, bestmove
+
+    def set_cb_info(self, cb):
+        self._cb_info = cb
+
+    def send_info(self, depth, score, pv):
+        self._cb_info(depth=depth, score=score, pv=pv, nodes=self.stat.nodes,
+                      time=(time.time() - self.stat.t_start))

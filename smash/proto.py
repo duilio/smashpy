@@ -3,7 +3,7 @@ import logging
 
 from smash.board import Board
 from smash.move import Move
-
+from smash.evaluate import MAT_SCORES
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +39,7 @@ class Protocol(object):
 class UCIProtocol(Protocol):
     def __init__(self, engine, board_class=Board):
         super(UCIProtocol, self).__init__(engine, board_class)
+        engine.set_cb_info(self._cb_info)
 
     def read_command(self):
         cmd = self.read_input()
@@ -95,5 +96,29 @@ class UCIProtocol(Protocol):
     def _go_command(self, args):
         # TODO: parse arguments
         move, score = self.engine.bestmove(self.board)
-        self.write('info cp %s' % score)
         self.write('bestmove %s' % move.str_simple())
+
+    def _cb_info(self, **kwargs):
+        s = ['info']
+
+        if 'depth' in kwargs:
+            s.append('depth %(depth)s')
+        if 'nodes' in kwargs:
+            s.append('nodes %(nodes)s')
+        if 'score' in kwargs:
+            kwargs['score_cp'] = kwargs['score'] * (100 / MAT_SCORES['p'])
+            s.append('score cp %(score_cp)s')
+        if 'time' in kwargs:
+            kwargs['time_ms'] = int(kwargs['time'] * 1000)
+            s.append('time %(time_ms)s')
+
+        if 'nodes' in kwargs and kwargs.get('time', 0):
+            kwargs['nps'] = int(kwargs['nodes'] / kwargs['time'])
+            s.append('nps %(nps)s')
+
+        if 'pv' in kwargs:
+            kwargs['pv_moves'] = ' '.join(x.str_simple() for x in kwargs['pv'])
+            s.append('pv %(pv_moves)s')
+
+        s = ' '.join(s)
+        self.write(s % kwargs)
