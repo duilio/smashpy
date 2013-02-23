@@ -1,5 +1,7 @@
-import numpy as np
+from contextlib import contextmanager
 from collections import namedtuple
+
+import numpy as np
 
 
 pieces = ' PNBRQK pnbrqk'
@@ -272,6 +274,19 @@ class BaseBoard(object):
         xking = {'w': 'k', 'b': 'K'}[self.stm]
         sq = np.where(self.raw == xking)[0][0]
         return not self.can_attack(self.stm, sq)
+
+    def legal_moves(self):
+        raise NotImplemented()
+
+    @contextmanager
+    def moving(self, m):
+        """Context manager to make a move and undo it at the end"""
+
+        try:
+            self.move(m)
+            yield
+        finally:
+            self.undo()
 
     def _is_checked(self):
         king = {'w': 'K', 'b': 'k'}[self.stm]

@@ -19,6 +19,11 @@ def main():
     engine_parser.add_argument('-l', '--log', metavar='FILENAME', default=None)
     engine_parser.set_defaults(cmd=run_engine)
 
+    epd_parser = subparsers.add_parser('epd', help='Run an EPD test suite')
+    epd_parser.add_argument('-d', '--depth', metavar='DEPTH', default=4, type=int)
+    epd_parser.add_argument('file', metavar='FILENAME', type=argparse.FileType('r'))
+    epd_parser.set_defaults(cmd=run_epd)
+
     shell_parser = subparsers.add_parser('shell', help='Run smash shell')
     shell_parser.set_defaults(cmd=run_shell)
     
@@ -125,6 +130,13 @@ def run_engine(args):
     proto = UCIProtocol(Engine(depth=args.depth), Board)
     proto.loop()
 
+def run_epd(args):
+    from smash.engine import Engine
+    from smash.epd import EPDSuite
+
+    engine = Engine(depth=args.depth)
+    suite = EPDSuite(args.file)
+    suite.test_engine(engine)
 
 if __name__ == '__main__':
     sys.exit(main())

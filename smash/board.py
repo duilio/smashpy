@@ -1,7 +1,8 @@
 from smash.base import \
     BaseBoard, SquareHelper, START_POSITION, rank, col, pair2square, swap_side
 from movegen import \
-    gen_knight_captures, gen_bishop_captures, gen_rook_captures, gen_king_captures
+    gen_knight_captures, gen_bishop_captures, gen_rook_captures, gen_king_captures, \
+    gen_moves
 
 
 # workarounds for pyflakes
@@ -56,3 +57,11 @@ class Board(BaseBoard):
                 return True
 
         return False
+
+    def legal_moves(self):
+        moves = []
+        for m in gen_moves(self):
+            with self.moving(m):
+                if self.is_legal():
+                    moves.append(m)
+        return moves

@@ -1,19 +1,7 @@
 import time
-from contextlib import contextmanager
 
 from smash.evaluate import INF, evaluate
 from smash.movegen import gen_moves
-
-
-@contextmanager
-def moving(board, move):
-    """Context manager to make a move and undo it at the end"""
-
-    try:
-        board.move(move)
-        yield board
-    finally:
-        board.undo()
 
 
 def mate_score(ply):
@@ -49,6 +37,11 @@ class Engine(object):
         self.config.update(config)
         self.stat = Stat()
 
+        def _cb_null(*args, **kwargs):
+            pass
+
+        self._cb_info = _cb_null
+
     def check_end(self, board, ply):
         """Check the end of a game
 
@@ -58,7 +51,7 @@ class Engine(object):
 
         """
         for move in gen_moves(board):
-            with moving(board, move):
+            with board.moving(move):
                 if board.is_legal():
                     return None
 
@@ -106,7 +99,7 @@ class Engine(object):
         bestmove = None
 
         for move in gen_moves(board):
-            with moving(board, move):
+            with board.moving(move):
                 if not board.is_legal():
                     continue
 

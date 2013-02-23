@@ -1,4 +1,8 @@
+import re
 from base import squares, squares_inv, rank, col, pair2square
+
+
+SAN_EXP = re.compile(r'^(?P<piece>[PNRBQK])?(?P<src>[a-h][1-8]?)?(?P<capture>[x:])?-?(?P<dst>[a-h]?[1-8]?)(?:e\.p)?(?P<promote>(?:=)?[NBRQ]|(?:\()[NBRQ](?:\)))?(?:\+)?$')
 
 
 class Move(object):
@@ -99,3 +103,104 @@ class Move(object):
 
         return cls(src, dst, capture=capture, en_passant=en_passant,
                    promote=promote)
+
+    @classmethod
+    def from_san(cls, board, s):
+        """Parses a SAN move
+
+        """
+        CASTLING = {
+            'w': {
+                'src': squares['e1'],
+                'k_dst': squares['g1'],
+                'q_dst': squares['c1'],
+                },
+            'b': {
+                'src': squares['e8'],
+                'k_dst': squares['g8'],
+                'q_dst': squares['c8'],
+                }
+            }
+
+        # special case: castling
+        if s in ('0-0', 'O-O'):
+            sq = CASTLING[board.stm]
+            return Move(sq['src'], sq['k_dst'])
+        elif s in ('0-0-0', 'O-O-O'):
+            sq = CASTLING[board.stm]
+            return Move(sq['src'], sq['q_dst'])
+
+        p, src, capture, dst, promote = SAN_EXP.match(s).groups()
+
+        #
+        # fill missing information
+        #
+
+        if not p:
+            p = 'P'
+
+        if not dst:
+            dst = src
+            src = None
+
+        # convert piece name to a side-aware name
+        if board.stm == 'b':
+            p = p.lower()
+            if promote:
+                promote = promote.lower()
+
+        b = board.raw
+        moves = [m for m in board.legal_moves() if b[m.src] == p]
+        assert moves
+
+        def parse_square(square):
+            """Returns the square coordinates
+
+            NOTE: either column or rank might miss... in this case we return None
+
+            """
+            columns = dict(zip('abcdefgh', range(8)))
+            ranks = dict(zip('12345678', range(8)))
+
+            if square[0] in columns:
+                c = columns[square[0]]
+                square = square[1:]
+            else:
+                c = None
+
+            if square and square[0] in ranks:
+                r = ranks[square[0]]
+            else:
+                r = None
+
+            return r, c
+
+        # filter by source square (if any...)
+        if src:
+            src_r, src_c = parse_square(src)
+            if src_r is not None:
+                moves = [m for m in moves if rank(m.src) == src_r]
+
+            if src_c is not None:
+                moves = [m for m in moves if col(m.src) == src_c]
+
+        # filter by dst square (required!)
+        dst_r, dst_c = parse_square(dst)
+        if dst_r is not None:
+            moves = [m for m in moves if rank(m.dst) == dst_r]
+
+        if dst_c is not None:
+            moves = [m for m in moves if col(m.dst) == dst_c]
+
+        assert moves
+
+        # if it is required the move to be a capture, filter non captures
+        if capture:
+            moves = [m for m in moves if m.capture]
+
+        # filter by promoted piece
+        if promote:
+            moves = [m for m in moves if m.promote == promote]
+
+        assert len(moves) == 1
+        return moves[0]
