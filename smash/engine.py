@@ -7,7 +7,7 @@ from smash.movegen import gen_moves
 def mate_score(ply):
     """Mate score is relative to the number of plies followed"""
 
-    return -(INF - ply)
+    return -(INF - ply + 1)
 
 
 class Stat(object):
@@ -56,7 +56,7 @@ class Engine(object):
                     return None
 
         if board.checked:
-            return -mate_score(ply)
+            return mate_score(ply)
         else:
             return 0
 
@@ -115,7 +115,7 @@ class Engine(object):
             stat.leaves += 1
             if board.checked:
                 stat.mates += 1
-                return -INF, None
+                return mate_score(ply), None
             else:
                 stat.draws += 1
                 return 0, None
