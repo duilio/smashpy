@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import logging
 import argparse
 
 from smash.board import Board, START_POSITION
@@ -12,6 +13,11 @@ def main():
 
     subparsers = parser.add_subparsers(
         title='Commands', description='smash builtin commands')
+
+    engine_parser = subparsers.add_parser('engine', help='Run smash in engine mode')
+    engine_parser.add_argument('-d', '--depth', metavar='DEPTH', default=4, type=int)
+    engine_parser.add_argument('-l', '--log', metavar='FILENAME', default=None)
+    engine_parser.set_defaults(cmd=run_engine)
 
     shell_parser = subparsers.add_parser('shell', help='Run smash shell')
     shell_parser.set_defaults(cmd=run_shell)
@@ -72,53 +78,14 @@ def run_shell(args):
     """Open a python shell with some useful commands"""
     
     import code
-    from itertools import izip_longest
 
-    from smash.move import Move
-    from smash.movegen import gen_moves
-    from smash.base import squares
-    from smash.perft import perft
+    from smash.shell.commands import ShellHelper
+    from smash.engine import Engine
+
 
     board = Board(args.fen)
-
-    def move_helper(*args, **kwargs):
-        if len(args) + len(kwargs) == 1:
-            board.move(*args, **kwargs)
-        else:
-            m = Move(*args, **kwargs)
-            board.move(m)
-        show_helper()
-
-    def undo_helper():
-        board.undo()
-        show_helper()
-
-    def show_helper():
-        print board
-        print board.fen()
-
-    def perft_helper(depth):
-        print perft(board, depth, 0)
-
-    def movelist_helper():
-        r = []
-        for m in gen_moves(board):
-            board.move(m)
-            if board.is_legal():
-                r.append(m.str_simple())
-            board.undo()
-        r = iter(r)
-        for row in izip_longest(*[r]*4, fillvalue=''):
-            print ' '.join(row)
-
-    imported_objects = dict(b=board,
-                            move=move_helper,
-                            undo=undo_helper,
-                            fen=board.fen,
-                            show=show_helper,
-                            perft=perft_helper,
-                            movelist=movelist_helper, )
-    imported_objects.update(squares)
+    engine = Engine(depth=4)
+    shell_helper = ShellHelper(board, engine)
 
     try:
         import readline
@@ -127,7 +94,7 @@ def run_shell(args):
     else:
         import rlcompleter
         readline.set_completer(
-            rlcompleter.Completer(imported_objects).complete)
+            rlcompleter.Completer(shell_helper.objects).complete)
         readline.parse_and_bind('tab:complete')
 
     banner = """
@@ -137,7 +104,27 @@ Shell interpreter.
 %s
 %s
 """ % ('0.2', str(board), board.fen())
-    code.interact(local=imported_objects, banner=banner.strip())
+    code.interact(local=shell_helper.objects, banner=banner.strip())
+
+def run_engine(args):
+    """Runs the engine"""
+
+    import logging
+
+    from smash.proto import UCIProtocol
+    from smash.engine import Engine
+    from smash.board import Board
+
+    if args.log:
+        logging.basicConfig(filename=args.log, level=logging.DEBUG,
+                            format='%(asctime)s - %(process)d [%(levelname)s] %(message)s')
+    else:
+        logging.basicConfig(level=logging.WARNING,
+                            format='%(asctime)s [%(levelname)s] %(message)s')
+
+    proto = UCIProtocol(Engine(depth=args.depth), Board)
+    proto.loop()
+
 
 if __name__ == '__main__':
     sys.exit(main())

@@ -6,6 +6,7 @@ MAT_SCORES = {
     'q': 80,
     }
 
+INF = 100000
 
 for p in 'PNBRQ':
     MAT_SCORES[p] = MAT_SCORES[p.lower()]
